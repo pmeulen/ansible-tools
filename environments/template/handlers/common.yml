@@ -1,0 +1,4 @@
+# handlers for the environement specific tasks of the common role
+
+- name: restart sshd
+  service: name=sshd state=restarted

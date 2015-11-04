@@ -1,0 +1,6 @@
+/.idea
+/.vagrant
+/apt
+/environments/vm/*
+!/environments/vm/inventory
+!/environments/vm/host_vars

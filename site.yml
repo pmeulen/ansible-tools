@@ -1,0 +1,24 @@
+# This is the main ansible-playbook
+
+# Run using:
+# ansible-playbook site.yml -i environments/vm/inventory
+
+- name: Configuration for all nodes
+  hosts: all
+  sudo: True
+  tags: common
+  gather_facts: no
+  remote_user: "{{ ansible_remote_user }}"
+
+  roles:
+  - common
+
+#- name: Apply role "example" to hosts in group "somegroup"
+#  hosts: somegroup
+#  sudo: True
+#  tags: somegroup
+#  gather_facts: no
+#  remote_user: "{{ ansible_remote_user }}"
+#
+#  roles:
+#  - example
