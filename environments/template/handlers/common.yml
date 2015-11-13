@@ -1,4 +1,4 @@
-# handlers for the environement specific tasks of the common role
+# handlers for the environment specific tasks of the common role
 
 - name: restart sshd
-  service: name=sshd state=restarted
+  service: name=ssh state=restarted
