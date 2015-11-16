@@ -1,9 +1,9 @@
 # Ansible-tools
 Ansible-tools serves as a starting point and an example of an 
 [Ansible playbook](http://docs.ansible.com/ansible/playbooks.html) with some tools added that
-make it easier to use the same playbooks and roles for multiple environments. 
+make it easier to use the same playbooks and roles for multiple **environments**. 
 
-In this context an environment is a server or set of servers i.e. your production environment, your staging environment or your local development environment. It is not related to the environment variables like PATH or HOME that are used by an operating system.
+In this context an **environment** is a server or set of servers i.e. your production environment, your staging environment or your local development environment. It is not related to the environment variables like PATH or HOME that are used by an operating system.
 
 Ansible-tools demonstrates a way to use Ansible to effectively and securely manage multiple environments ranging from 
 development to production.
@@ -30,10 +30,10 @@ a standard [Ansible playbook](http://docs.ansible.com/ansible/playbooks.html) la
 
 When compared to a layouts described in the 
 [Ansible playbook best practices](http://docs.ansible.com/ansible/playbooks_best_practices.html) you will notice that it 
-is "missing" the inventory file(s) and the groups_vars and host_vars directories. In the organisation that Ansible-tools 
+is "missing" the inventory file(s) and the groups\_vars and host\_vars directories. In the organisation that Ansible-tools 
 is promoting these are all part of an environment and are stored in a different part of the directory structure. 
 
-This is what allows configuration that is specific for an environment can be managed separately from the Ansible 
+This separation is what allows the configuration that is environment specific to be managed separately from the Ansible 
 playbook(s) and roles. Environment specific configuration are things like Hostnames, IP addresses, Firewall rules,
 Email addresses, Passwords, private keys, certificates etc.
 
