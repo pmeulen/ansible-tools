@@ -178,7 +178,7 @@ Next an example from the same file of using a template from the environment
 Note that we use _inventory_dir_ to reference the template. The adopted convention is to store templates under 
 _templates/\<role name\>/_ in de environment.
 
-## [Including tasks defined in an environment](id:environmment_tasks)
+## [Including tasks defined in an environment](id:environment_tasks)
 At the end of _roles/common/tasks/main.yml_ tasks from the environment are included: 
 
     - include: "{{ inventory_dir }}/tasks/common.yml"
@@ -192,7 +192,7 @@ Note the convention used for storing the included tasks and handlers in the envi
 - tasks/\<role name\>.yml
 - handlers/\<role name\>.yml
 
-## About the group_vars direcory
+## About the group_vars directory
 You may expect there to be a top level _group_vars_ directory next to your _role_ directory. There is none, and when you
 add it, you will find that it is not used. This is because _group_vars_ (and _host_vars_) directories are resolved
 relative to the _inventory_ directory.
@@ -208,7 +208,7 @@ template environment.
 ### Adding a new variable
 When you add a variable in the _groups_vars_ directory of an environment, you should add it to the _groups_vars_
 in the _environments/template_ directory as well. This way the template serves as a palace to document the use of the
-varible for all environments.
+variable for all environments.
 
 > Add all variables that are used to the template environment and document them there
 
@@ -216,5 +216,8 @@ But what value to give to the new variable? Give it a value that works well (i.e
 the development VM. This allows you to verify that the template is still up to date: create a new vm using the template.
 This test can be automated.
 
-> Make the template environemnt testable: Set the group_var variables in the template to values that immediately work in the 
+> Make the template environment testable: Set the group_var variables in the template to values that immediately work in the 
 > vm
+
+Variables used in a role that do not change between environments should not be stored in the environment. These can be
+stored in the _vars_ directory of the role in the playbook.
