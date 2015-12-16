@@ -3,10 +3,12 @@ Ansible-tools serves as a starting point and an example of an
 [Ansible playbook](http://docs.ansible.com/ansible/playbooks.html) with some tools added that
 make it easier to use the same playbooks and roles for multiple **environments**. 
 
-In this context an **environment** is a server or set of servers i.e. your production environment, your staging environment or your local development environment. It is not related to the environment variables like PATH or HOME that are used by an operating system.
+In this context an [**environment**](id:environment) is a server or set of servers i.e. your production environment, 
+your staging environment or your local development environment. It is not related to the environment variables like 
+PATH or HOME that are used by an operating system.
 
-Ansible-tools demonstrates a way to use Ansible to effectively and securely manage multiple environments ranging from 
-development to production.
+Ansible-tools demonstrates a way to use Ansible to effectively and securely manage multiple environments ranging 
+from development to production using the same playbook.
 
 Ansible-tools provides:
 
@@ -17,8 +19,38 @@ Ansible-tools provides:
 The setup used by Ansible-tools assumes that you will be managing multiple similar environments. It can be used to
 manage a single environment of course, and the use of Vagrant and a keyczar based vault is entirely optional.
 
-## Quick start
-For a quick start jump to [Create a development VM](#quickstart) below.
+Suggestions, improvements or critique welcome.
+
+# [Quickstart: Creating a development VM](id:quickstart)
+
+This section is intended to get you started quickly with a development VM. Is lets you install the required tools 
+and lets you create a Vagrant VM and run an Ansible playbook on it. It does not use the encryption feature of 
+Ansible tools. The how and why are descriped in the sections below.
+
+First install the tools on your local machine:
+
+* Install [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org). Virtualbox will run 
+  the development VM and Vagrant is used to create, configure and manage the development VM instance.
+* Install [Ansible](http://www.ansible.com). There are several ways to install Ansible. They are described in the 
+  [Ansible installation guide](http://docs.ansible.com/ansible/intro_installation.html).
+
+Clone or download this repository to your loacal machine if you haven't already. Next change into the "ansible-tools" 
+directory (i.e. where this README is located) and create and start the development VM: 
+
+    $ vagrant up
+
+This prepares a VM that is ready to be managed by Ansible. It will call a simple Ansible playbook to make some changes to the VM. Run `$ vagrant provision` to rerun just the provisioning step and update the inventory.
+
+Create the new environment for the VM:
+
+    $ ./scripts/create_new_environment.sh environments/vm
+
+A starting point for a playbook is provided. Run the playbook "site.yml": 
+
+    $ ansible-playbook site.yml -i environments/vm/inventory
+
+You can login to the VM using `$ vagrant ssh`
+
 
 # Organisation
 Ansible-tools is organised such that it can be used as a starting point for your own Ansible project. It follows
@@ -92,58 +124,31 @@ The "create_new_environment.sh" script is used to create a new environment based
 specification for the passwords and certificates to create for the new environment.
 
 To create a new environment call "create_new_environment.sh" and provide the path to the directory where to create
-the new environment. E.g.: 
+the new environment. The [environments/vm](#vmdir) used in the example below already contains an inventory and host_vars files that are suitable for use with Vagrant VM. Create the environment using: 
 
 `$ ./scripts/create_new_environment.sh environments/vm`
 
 This creates a new environment in the "environments/vm" directory. When the specified directory does not exists, 
 the directory is created. The script will not overwrite any existing files or directories in the specified environment 
-directory. Note that you can create an environemnt directory anywhere. 
+directory. Note that you can create an environment directory anywhere. 
 
 The "create_new_environment.sh" script:
 
 - Copies the "group_vars", "handlers", "tasks" and "template" directories from the template
-- Generates a passwords, certificates, a keyszar key and root CA a specified in the "environment.conf" in the template.
+- Generates a passwords, certificates, a keyszar key and root CA a specified in the "environment.conf in the template.
  
 Because it does not overwrite existing files, you can rerun the script to generate a password or certificate when the
 "environment.conf" is updated.
 
 ## Running an Ansible playbook
 When you run "ansible-playbook" you need to provide it with the location of the "inventory" file in the environment. You
-do this by specifying its location using the "-i" or "--inventory" in "ansible-playbook" command. W.g.
+do this by specifying its location using the "-i" or "--inventory" in "ansible-playbook" command. E.g.
 
 `$ ansible-playbook site.yml -i environments/vm/inventory`
 
 If you omit the inventory, Ansible will try to use an the inventory file from one of its default locations 
 (/etc/ansible/hosts, ./inventory), which is probably not what you want.
  
-
-# [Create a development VM](id:quickstart)
-Getting started with a development VM using ansible-tools.
-
-First install the tools:
-
-* Install [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org). Virtualbox will run 
-  the development VM and Vagrant is used to create, configure and manage the development VM instance.
-* Install [Ansible](http://www.ansible.com). There are several ways to install Ansible. They are described in the 
-  [Ansible installation guide](http://docs.ansible.com/ansible/intro_installation.html).
-
-Next change into the "ansible-tools" directory (i.e. where this README is located) and create and start the development VM: 
-
-    $ vagrant up
-
-This prepares a VM that is ready to be managed by Ansible. It will call a simple Ansible playbook to make some changes to the VM. Run `$ vagrant provision` to rerun just the provisioning step and update the inventory.
-
-Create the new environment for the VM:
-
-    $ ./scripts/create_new_environment.sh environments/vm
-
-A starting point for a playbook is provided. Run the playbook "site.yml": 
-
-    $ ansible-playbook site.yml -i environments/vm/inventory
-
-You can login to the VM using `$ vagrant ssh`
-
 # Working with environments from a Playbook
 Ansible tools comes with a working example playbook _site.yml_. This playbook applies the _common_ role to a server. 
 This common role demonstrates two environment techniques:
@@ -216,8 +221,142 @@ But what value to give to the new variable? Give it a value that works well (i.e
 the development VM. This allows you to verify that the template is still up to date: create a new vm using the template.
 This test can be automated.
 
-> Make the template environment testable: Set the group_var variables in the template to values that immediately work in the 
-> vm
+> Make the template environment testable: Set the group_var variables in the template to values that immediately work in 
+> the vm
 
 Variables used in a role that do not change between environments should not be stored in the environment. These can be
 stored in the _vars_ directory of the role in the playbook.
+
+## [Using the generated secrets in your playbooks](id:using_secrets)
+
+The encrypted secrets, password and certificates to be created by the _create_new_environment.sh_ script are specified 
+in the _environments/template/environment.conf_ file. Generated secrets will be stored in the environment' directory in the 
+"password", "secret", "ssl_cert" or "saml_cert" in a directory, depending on the type of secret. To use the secret
+in a playbook it must be read from disk. For this the Jinja2 "lookup" function can be used. E.g. to read the "some_password" 
+password from the environment:
+
+    "{{ lookup('file', inventory_dir+'/password/some_password') }}"
+    
+While you could use this directly in your templates or Ansible tasks, for readibility, it is recommened to create variables 
+in group vars. Assuming you have a "middleware" role, the group_vars/middleware.yml in your environment could contain:
+
+    # Password for the middleware managegment API
+    middleware_management_api_password: "{{ lookup('file', inventory_dir+'/password/middleware_management_api') }}"
+    
+    # Middleware encryption secret
+    middleware_encryption_secret: "{{ lookup('file', inventory_dir+'/secret/middleware') }}"
+    
+    # Format: PEM RSA PRIVATE KEY
+    middleware_ssl_key: "{{ lookup('file', inventory_dir+'/ssl_cert/middleware.key') }}"
+    
+    # Format: PEM X.509 Certificate (chain)
+    # Order: SSL Server certificate followed by intermediate certificate(s) in chain order.
+    # Do not include root CA certificate
+    middleware_ssl_certificate: "{{ lookup('file', inventory_dir+'/ssl_cert/middleware.crt') }}"
+    
+    # Format: PEM RSA PRIVATE KEY
+    middleware_saml_sp_privatekey: "{{ lookup('file', inventory_dir+'/saml_cert/middleware_saml_sp.key') }}"
+    
+    # Format: PEM X.509 certificate
+    middleware_saml_sp_publickey: "{{ lookup('file', inventory_dir+'/saml_cert/middleware_saml_sp.crt') }}"
+    
+Now you can use the variables in your tasks and templates. E.g.
+
+    - name: Put ssl cert for middleware
+      copy: content="{{ middleware_ssl_certificate }}" dest=/etc/nginx/middleware.crt
+      notify:
+          - restart nginx
+
+    - name: Put proxy key for {{ component_name }}
+      copy: content="{{ middleware_ssl_key }}" dest=/etc/nginx/middleware.key owner=root mode=400
+      notify:
+          - restart nginx
+
+# Encrypting secrets
+An [environment](#environment) will typicaly contain secrets like passwords, private keys. Ansible-tools can use a vault 
+to store these secrets in encrypted form in the environment. A vault uses a symetric key to encrypt en decrypt secrets 
+so only this key has to be protected. This allows the encrypted values to be put inder version control like the rest 
+of the environment.
+
+The included "create_new_environment.sh" script can be used to create the encryption key for an environment and to
+generate the secrets required by the environment in one go. The specification for the secrets to create and wether 
+to use encryption in configured in the "environment.conf" in the template.
+
+Ansible-tools promotes a setup for encrypting secrets that is different from the 
+[Ansible Vault](http://docs.ansible.com/ansible/playbooks_vault.html). Where the Ansible vault feature encrypts an entire 
+.yml file with varibale names and values, whereas the Asnible-tools approach encrypts just the values en decryptes them 
+just before they are needed. Both use the [python-keyczar](https://pypi.python.org/pypi/python-keyczar) for encryption.
+
+When talking about a **vault** in the rest of this document this refers to the way Ansible-tools uses keyczar to work 
+with encrypted values, not the Ansible playbook vault.
+
+## Required tools
+
+To use the vault python-keyczar must be installed. Use `pip install python-keyczar` to install this tool.
+
+## Enabling encryption
+
+To enable encryption of secrets set "USE_KEYSZAR=1" in _environments/template/environment.conf_. Any new password,
+secrets or private keys generated by the "create_new_environment.sh" will be encrypted. Existing secrets will not be 
+changed. To create encrypted secrets you can delete the exiting ons and rerun the script, or you can encrypt them
+manually using the _encrypt-file.sh_ script. 
+
+E.g to output the encypted contents of "environments/password/some_password":
+
+`$ ./scripts/encrypt-file.sh environment/vm/ansible-keystore -f environments/password/some_password`
+
+The encrypted secrets, password and certificates to be created by the _create_new_environment.sh_ script are specified 
+in the _environments/template/environment.conf_ file. Generated secrets will be stored in the environment in the 
+"password", "secret", "ssl_cert" or "saml_cert" directory, depending on type.
+
+You must update your playbooks to decrypt the secrets. Ansible-tools already set a variable "vault_keydir" in 
+_group_vars/all.yml_ that points to the keyset: `vault_keydir: "{{ inventory_dir }}/ansible-keystore"`.
+
+We assume that you are loading your secrets in (group) variables as described [above](#using_secrets).
+
+To decrypt a secret so it can be used in an Ansible playbook you use the custom Jinja2 filter "vault". This filter 
+expects one argument: the location of the keyset to use to decrypt the secret.
+
+Example of an Ansible task that is not using encrypted passwords:
+
+    - name: add mariadb backup user
+      mysql_user:
+        name: "{{ mariadb_backup_user }}"
+        password: "{{ mariadb_backup_password }}"
+        login_user: root
+        login_password: "{{ mariadb_root_password }}"
+        priv: "*.*:SELECT"
+        state: present
+      when: mariadb_enable_remote_ssh_backup | default(false)
+
+Example of the same task that is using encrypted passwords:
+
+    # Task that is using encrypted passwords
+    - name: add mariadb backup user
+      mysql_user:
+        name: "{{ mariadb_backup_user }}"
+        password: "{{ mariadb_backup_password | vault(vault_keydir) }}"
+        login_user: root
+        login_password: "{{ mariadb_root_password | vault(vault_keydir) }}"
+        priv: "*.*:SELECT"
+        state: present
+      when: mariadb_enable_remote_ssh_backup | default(false)
+ 
+## Keyset
+
+When "USE_KEYSZAR=1" in _environments/template/environment.conf_ the "create_new_environment.sh" script will create a 
+keyset for the enviroment. This keyset contains the secret key that is used to encrypt and decrypt secrets. An existing 
+keyset will not be overwritten.
+
+## Using enrypted secrets in your playbooks
+
+Decryption of secrets is
+
+## Decrypting an encrypted file
+
+An encrypted file can be decrypted using the "-d" option to the _encrypt-file.sh_ script.
+
+E.g. to output the decrypted contents of "environments/password/some_password":
+
+`$ ./scripts/encrypt-file.sh -d environment/vm/ansible-keystore -f environments/password/some_password`
+
