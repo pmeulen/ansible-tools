@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2015 SURFnet B.V.
+# Copyright 2015, 2016 SURFnet B.V.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,8 +57,8 @@ if [ -z "${ENVIRONMENT_DIR}"  ]; then
     echo "Usage: $0 <environment directory> [--template <template directory>]"
     echo "
 Creates or updates an Ansible 'enviroment' from a template, generating certificates and passwords as specified in the
-'environment.conf' in the template. The <environemnt directory> is created if it does not exists. Existing files in the
-<environemnt directory> will never be changed by this script.
+'environment.conf' file in the template. The <environment directory> is created if it does not exists. Existing files in
+the <environment directory> will never be changed by this script.
 
 The <template directory> defaults to: '../environments/template' relative to the script. Use the '--template' option
 to specify an alternate location.
@@ -178,6 +178,8 @@ if [ ${#PASSWORDS[*]} -gt 0 ]; then
                 error_exit "Error generating password"
             fi
             echo "${generated_password}" > ${PASSWORD_DIR}/${pass}
+        else
+            echo "Password ${pass} exists, skipping"
         fi
     done
     if [ ! -e "${PASSWORD_DIR}/empty_placeholder" ]; then
@@ -191,6 +193,7 @@ if [ ${#PASSWORDS[*]} -gt 0 ]; then
 else
     echo "Skipping generation of passwords because none are defined in the environment.conf"
 fi
+
 
 # Generate secrets
 if [ ${#SECRETS[*]} -gt 0 ]; then
@@ -208,6 +211,8 @@ if [ ${#SECRETS[*]} -gt 0 ]; then
                 error_exit "Error generating secret"
             fi
             echo "${generated_secret}" > ${SECRET_DIR}/${secret}
+        else
+            echo "Secret ${secret} exists, skipping"
         fi
     done
 else
@@ -233,6 +238,8 @@ if [ ${#SAML_CERTS[*]} -gt 0 ]; then
             if [ $? -ne "0" ]; then
                 error_exit "Error creating SAML signing certificate"
             fi
+        else
+            echo "SAML signing certificate ${cert_name} exists, skipping"
         fi
     done
     cd ${CWD}
@@ -269,32 +276,66 @@ if [ ${#SSL_CERTS[*]} -gt 0 ]; then
             if [ $? -ne "0" ]; then
                 error_exit "Error creating SSL certificate"
             fi
+        else
+            echo "SSL certificate ${cert_name} exists, skipping"
         fi
     done
     cd ${CWD}
 else
     echo "Skipping generation of the CA and certificates because none are defined in the environment.conf"
-
 fi
 
+
+# Generate SSH keys
+if [ ${#SSH_KEYS[*]} -gt 0 ]; then
+    SSH_KEY_DIR=${ENVIRONMENT_DIR}/ssh
+    if [ ! -e ${SSH_KEY_DIR} ]; then
+        echo "Creating ssh directory"
+        mkdir -p ${SSH_KEY_DIR}
+    fi
+
+    cd ${SSH_KEY_DIR}
+    for key in "${SSH_KEYS[@]}"; do
+        if [ ! -e "${SSH_KEY_DIR}/${key}.pub" -a "${SSH_KEY_DIR}/${key}.key" ]; then
+            echo "Generating ssh keypair for ${key}"
+            ${BASEDIR}/gen_ssh_key.sh ${key} ${KEY_DIR}
+            if [ $? -ne "0" ]; then
+                error_exit "Error generating SSH keypair"
+            fi
+        else
+            echo "SSH keypair ${key} exists, skipping"
+        fi
+    done
+    cd ${CWD}
+else
+    echo "Skipping generation of ssh keys because none are defined in the environment.conf"
+fi
+
+
 echo
-echo "Created (or updated) passwords, secrets and certificates for the new environment. It is save to rerun this script
-as it will not overwrite existing files."
+echo "Created (or updated) passwords, secrets, certificates and/or ssh keys for the new environment as specified in
+the environment.conf: ${ENVIRONMENT_CONF}
+It is save to rerun this script as it will not overwrite existing files."
 if [ ${USE_KEYSZAR} -eq 1 ]; then
 echo "
 * All secrets (except the CA private key) are encrypted with a symmetic key that is stored in a \"vault\". The vault is
   located in ${KEY_DIR}
-  You should keep this key separate from the environment. To do this:
+
+* You can use the encrypt.sh and encrypt-file.sh scripts to encrypt and decrypt the secrets.
+
+* For productions (like) systems it is advisable to keep this key separate from the environment. To do this:
   1) Move the '${KEYSTORE_DIR}' to another location
   2) Update vault_keydir in group_vars/all.yml to point to the new location
-
-* You can use the encrypt.sh and encrypt-file.sh scripts to encrypt and decrypt the secrets."
+  Note that rerunning this script after moving the key will result in a new key being created, which is probably
+  undesired.
+"
 fi
 if [ ${#SSL_CERTS[*]} -gt 0 ]; then
 echo "
 * Certificate authority
   The CA directory (${CA_DIR})
-  contains the CA that is/was used for generating SSL server certificates. This CA is intended for testing purposes.
+  contains the CA that is/was used for generating SSL server certificates. This CA is intended for testing purposes
+  only.
   The private key of the CA is stored *unencrypted* in ca-key.pem the CA directory. The CA directory is not required
   for running the ansible playbooks."
 fi
@@ -304,3 +345,19 @@ echo "
   - updating the the .yml files with variables in the group_vars directory
   - updating the files in the templates directory
 "
+
+if [ ${#PASSWORDS[*]} -gt 0 ]; then
+    echo "The generated passwords are stored in: ${PASSWORD_DIR}"
+fi
+if [ ${#SECRETS[*]} -gt 0 ]; then
+   echo "The generated secrets are stored in: ${SECRET_DIR}"
+fi
+if [ ${#SAML_CERTS[*]} -gt 0 ]; then
+   echo "The generated self-signed certificates are stored in: ${SAML_CERT_DIR}"
+fi
+if [ ${#SSL_CERTS[*]} -gt 0 ]; then
+   echo "The generated SSL/TLS server certificates are stored in: ${SSL_CERT_DIR}"
+fi
+if [ ${#SSH_KEYS[*]} -gt 0 ]; then
+   echo "The generated ssh keypairs are stored in: ${SSH_KEY_DIR}"
+fi
