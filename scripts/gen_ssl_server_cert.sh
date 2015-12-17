@@ -115,6 +115,9 @@ if [ -d "${KEY_DIR}" ]; then
         error_exit "Error crypting private key"
     fi
     echo "${crypted_private_key}" > ${CERT_BASENAME}.key
+    if [ $? -ne "0" ]; then
+        error_exit "Error writing private key"
+    fi
 else
     cp ${tmpdir}/private_key.pem ${CERT_BASENAME}.key
     if [ $? -ne "0" ]; then
