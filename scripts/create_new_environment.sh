@@ -86,7 +86,6 @@ case $option in
 esac
 done
 
-
 TEMPLATE_DIR=`realpath ${TEMPLATE_DIR}`
 if [ $? -ne "0" ]; then
     error_exit "Could not find template dir"
@@ -103,6 +102,10 @@ echo "Reading configuration from: ${ENVIRONMENT_CONF}"
 . "${ENVIRONMENT_CONF}"
 echo "Done reading configuration"
 
+# Fallback to USE_KEYCZAR misspelled as USE_KEYSZAR
+if [ -z "${USE_KEYCZAR}" ]; then
+    USE_KEYCZAR=${USE_KEYSZAR}
+fi
 
 if [ ! -e ${ENVIRONMENT_DIR} ]; then
     echo "Creating new environment directory"
@@ -146,7 +149,7 @@ done
 
 
 KEY_DIR=""
-if [ "${USE_KEYSZAR}" -eq 1 ]; then
+if [ "${USE_KEYCZAR}" -eq 1 ]; then
     # Create keystore for encypting secrets
     KEY_DIR=${ENVIRONMENT_DIR}/${KEYSTORE_DIR}
 
@@ -158,7 +161,7 @@ if [ "${USE_KEYSZAR}" -eq 1 ]; then
     fi
     echo "Using keydir: ${KEY_DIR}"
 else
-    echo "Not using keyszar. Keys and passwords will be stored in plaintext"
+    echo "Not using keyczar. Keys and passwords will be stored in plaintext"
 fi
 
 
@@ -316,7 +319,7 @@ echo
 echo "Created (or updated) passwords, secrets, certificates and/or ssh keys for the new environment as specified in
 the environment.conf: ${ENVIRONMENT_CONF}
 It is save to rerun this script as it will not overwrite existing files."
-if [ ${USE_KEYSZAR} -eq 1 ]; then
+if [ ${USE_KEYCZAR} -eq 1 ]; then
 echo "
 * All secrets (except the CA private key) are encrypted with a symmetic key that is stored in a \"vault\". The vault is
   located in ${KEY_DIR}
