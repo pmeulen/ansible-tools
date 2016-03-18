@@ -23,9 +23,9 @@ Suggestions, improvements or critique welcome.
 
 # [Quickstart: Creating a development VM](id:quickstart)
 
-This section is intended to get you started quickly with a development VM. Is lets you install the required tools 
+This section is intended to get you started quickly with a development VM. It lets you install the required tools 
 and lets you create a Vagrant VM and run an Ansible playbook on it. It does not use the encryption feature of 
-Ansible tools. The how and why are descriped in the sections below.
+Ansible tools. The how and why are described in the sections below.
 
 First install the tools on your local machine:
 
@@ -34,12 +34,13 @@ First install the tools on your local machine:
 * Install [Ansible](http://www.ansible.com). There are several ways to install Ansible. They are described in the 
   [Ansible installation guide](http://docs.ansible.com/ansible/intro_installation.html).
 
-Clone or download this repository to your loacal machine if you haven't already. Next change into the "ansible-tools" 
+Clone or download this repository to your local machine if you haven't already. Next change into the "ansible-tools" 
 directory (i.e. where this README is located) and create and start the development VM: 
 
     $ vagrant up
 
-This prepares a VM that is ready to be managed by Ansible. It will call a simple Ansible playbook to make some changes to the VM. Run `$ vagrant provision` to rerun just the provisioning step and update the inventory.
+This prepares a VM that is ready to be managed by Ansible. It will call a simple Ansible playbook to make some changes to the VM. 
+Run `$ vagrant provision` to rerun just the provisioning step and update the inventory.
 
 Create the new environment for the VM:
 
@@ -60,16 +61,16 @@ a standard [Ansible playbook](http://docs.ansible.com/ansible/playbooks.html) la
 - The _filter_plugins_ directory - containing custom Ansible plugins
 - A top level Ansible playbook _site.yml_
 
-When compared to a layouts described in the 
-[Ansible playbook best practices](http://docs.ansible.com/ansible/playbooks_best_practices.html) you will notice that it 
-is "missing" the inventory file(s) and the groups\_vars and host\_vars directories. In the organisation that Ansible-tools 
+When compared to the directory layout described in the 
+[Ansible playbook best practices](http://docs.ansible.com/ansible/playbooks_best_practices.html) you will notice that ansible-tools 
+is "missing" the inventory file(s) and the groups\_vars and host\_vars directories. In the organisation that ansible-tools 
 is promoting these are all part of an environment and are stored in a different part of the directory structure. 
 
 This separation is what allows the configuration that is environment specific to be managed separately from the Ansible 
 playbook(s) and roles. Environment specific configuration are things like Hostnames, IP addresses, Firewall rules,
 Email addresses, Passwords, private keys, certificates etc.
 
-An environment is a independent directory structure. This allows it to be maintained in a different (git, svn, ...)
+An environment is an independent directory structure. This allows it to be maintained in a different (git, svn, ...)
 repository than the ansible playbooks. For an open source project, this allows open sourcing the Ansible playbooks 
 including everything that is required to setup a new environment without revealing any private infrastructure related 
 configuration. 
@@ -79,13 +80,13 @@ All that is the same between the environments should be put in the playbook(s), 
 - Updating a playbook needs only to be done once, updating an environment needs to be done for each environment.
 - Because the playbooks are shared by all the environments, they will get more testing.
 
-> Only put the variables and templates that are _different_ between environemnts in the environment. The rest goes in the
+> Only put the variables and templates that are _different_ between environments in the environment. The rest goes in the
 > playbook and roles
 
 The other top level directories and files are:
 
-- The _environemnts_ directory containg the template for a new environemnts
-- The _scripts_ directory containg the various scripts used to create a new environment and manage secrets and work with
+- The _environments_ directory containingg the template for a new environments
+- The _scripts_ directory containing the various scripts used to create a new environment and manage secrets and work with
   the Vault
 - A _Vagrantfile_ for creating a VM using Vagrant
 - _ansible.cfg_ (optional) makes playbooks run faster by enabling SSH pipelining, 
@@ -94,10 +95,10 @@ The other top level directories and files are:
 
 # Creating a new environment
 To get started you need an environment. Ansible-tools does not ship with a ready made environment, instead it ships
-with the tools to create a new environments. In the environments directory of Ansible-tools you will find two 
+with the tools to create new environments. In the environments directory of Ansible-tools you will find two 
 directories:
 
-- [template](#templatedir) - the starting point of all new environments
+- [template](#templatedir) - This is the starting point of all new environments
 - [vm](#vmdir) - some configuration that matches the included Vagrant file.
 
 ## [About the environments/template directory](id:templatedir)
@@ -108,11 +109,11 @@ the template is kept up to date as the playbooks evolve over time. Besides a too
 think of the template as an excellent place to document the use of all variables that go into the environments.
 
 The template directory contains one extra file: "environment.conf". This file contains a specification for the 
-passwords and certificates to create when a new environment is created. This file is read by the script that creates
-a new environment.
+passwords and certificates to create when a new environment is created. This file is read by the _create_new_environment.sh_
+script that creates a new environment.
 
 ## [About the environments/vm directory](id:vmdir)
-The "environments/vm" is not yet a complete environment, it contains just some configuration to work with the Vagrant 
+The "environments/vm" does not yet contain a complete environment, it contains just some configuration to work with the Vagrant 
 VM. It contains:
 
 * A symlink to the inventory file that was generated by Vagrant
@@ -124,18 +125,20 @@ The "create_new_environment.sh" script is used to create a new environment based
 specification for the passwords and certificates to create for the new environment.
 
 To create a new environment call "create_new_environment.sh" and provide the path to the directory where to create
-the new environment. The [environments/vm](#vmdir) used in the example below already contains an inventory and host_vars files that are suitable for use with Vagrant VM. Create the environment using: 
+the new environment. The [environments/vm](#vmdir) used in the example below already contains an inventory and host_vars files 
+that are suitable for use with Vagrant VM. Create the environment using: 
 
 `$ ./scripts/create_new_environment.sh environments/vm`
 
 This creates a new environment in the "environments/vm" directory. When the specified directory does not exists, 
 the directory is created. The script will not overwrite any existing files or directories in the specified environment 
-directory. Note that you can create an environment directory anywhere. 
+directory. Note that you can create an environment directory anywhere, it does not have to be in the same directory tree
+as the playbooks and roles.
 
 The "create_new_environment.sh" script:
 
 - Copies the "group_vars", "handlers", "tasks" and "template" directories from the template
-- Generates a passwords, certificates, a keyszar key and root CA a specified in the "environment.conf in the template.
+- Generates passwords, certificates, a keyczar key and root CA as specified in the "environment.conf in the template.
  
 Because it does not overwrite existing files, you can rerun the script to generate a password or certificate when the
 "environment.conf" is updated.
@@ -147,7 +150,7 @@ do this by specifying its location using the "-i" or "--inventory" in "ansible-p
 `$ ansible-playbook site.yml -i environments/vm/inventory`
 
 If you omit the inventory, Ansible will try to use an the inventory file from one of its default locations 
-(/etc/ansible/hosts, ./inventory), which is probably not what you want.
+(/etc/ansible/hosts or ./inventory), which is probably not what you want.
  
 # Working with environments from a Playbook
 Ansible tools comes with a working example playbook _site.yml_. This playbook applies the _common_ role to a server. 
@@ -160,17 +163,19 @@ Both techniques use the Ansible _inventory_dir_ variable to refer to files from 
 from the role directory. This is a useful technique for dealing with differences between environments. The goal remains
 to put as little as possible in the environment, and to keep most of the functionality in the playbooks and roles.
 
-The example role, is just that, en example. It is not used from the playbook but contains a selection of common Anisble
+The example role, is just that, en example. It is not used from the playbook but contains a selection of common Ansible
 patterns.
 
 ## [Using a template from an environment](id:environment_templates)
-Look at _roles/common/tasks/main.yml_. First standard use of a template defined in the role. This tasks uses the
+Look at [roles/common/tasks/main.yml](https://github.com/pmeulen/ansible-tools/blob/master/roles/common/tasks/main.yml). 
+
+First the standard way of using of a template defined in the role. This tasks uses the
 template file from _roles/common/templates/hostname.j2_:
 
     - name: Set /etc/hostname to {{ inventory_hostname }}
       template: src='hostname.j2' dest='/etc/hostname'
 
-Next an example from the same file of using a template from the environment 
+Next an example from the same file that uses a template from the environment instead of from the role: 
 
     - name: Put iptables configuration
       template: src={{ inventory_dir }}/templates/common/{{item}}.j2 dest=/etc/iptables/{{ item }}
@@ -198,7 +203,7 @@ Note the convention used for storing the included tasks and handlers in the envi
 - handlers/\<role name\>.yml
 
 ## About the group_vars directory
-You may expect there to be a top level _group_vars_ directory next to your _role_ directory. There is none, and when you
+You might expect there to be a top level _group_vars_ directory next to your _role_ directory. There is none, and when you
 add it, you will find that it is not used. This is because _group_vars_ (and _host_vars_) directories are resolved
 relative to the _inventory_ directory.
 
@@ -212,7 +217,7 @@ template environment.
 
 ### Adding a new variable
 When you add a variable in the _groups_vars_ directory of an environment, you should add it to the _groups_vars_
-in the _environments/template_ directory as well. This way the template serves as a palace to document the use of the
+in the _environments/template_ directory as well. This way the template serves as a place to document the use of the
 variable for all environments.
 
 > Add all variables that are used to the template environment and document them there
@@ -224,21 +229,21 @@ This test can be automated.
 > Make the template environment testable: Set the group_var variables in the template to values that immediately work in 
 > the vm
 
-Variables used in a role that do not change between environments should not be stored in the environment. These can be
-stored in the _vars_ directory of the role in the playbook.
+Variables used in a role that do not typically change between environments should not be stored in the environment. These can 
+be stored in the _vars_ directory of the role in the playbook.
 
 ## [Using the generated secrets in your playbooks](id:using_secrets)
 
 The encrypted secrets, password and certificates to be created by the _create_new_environment.sh_ script are specified 
-in the _environments/template/environment.conf_ file. Generated secrets will be stored in the environment' directory in the 
-"password", "secret", "ssl_cert" or "saml_cert" in a directory, depending on the type of secret. To use the secret
+in the _environments/template/environment.conf_ file. Generated secrets will be stored in the environment's directory in the 
+"password", "secret", "ssl_cert" or "saml_cert" directory, depending on the type of secret. To use the secret
 in a playbook it must be read from disk. For this the Jinja2 "lookup" function can be used. E.g. to read the "some_password" 
-password from the environment:
+password from the "password" directory in the environment:
 
     "{{ lookup('file', inventory_dir+'/password/some_password') }}"
     
-While you could use this directly in your templates or Ansible tasks, for readibility, it is recommened to create variables 
-in group vars. Assuming you have a "middleware" role, the group_vars/middleware.yml in your environment could contain:
+While you could use this directly in your templates or Ansible tasks, for readability, it is recommended to create a variable 
+fot the secret in group_vars. Assuming you have a "middleware" role, the group_vars/middleware.yml in your environment could contain:
 
     # Password for the middleware managegment API
     middleware_management_api_password: "{{ lookup('file', inventory_dir+'/password/middleware_management_api') }}"
@@ -260,34 +265,34 @@ in group vars. Assuming you have a "middleware" role, the group_vars/middleware.
     # Format: PEM X.509 certificate
     middleware_saml_sp_publickey: "{{ lookup('file', inventory_dir+'/saml_cert/middleware_saml_sp.crt') }}"
     
-Now you can use the variables in your tasks and templates. E.g.
+Now you can use these variables in your tasks and templates. E.g.
 
-    - name: Put ssl cert for middleware
+    - name: Put SSL certificate for middleware
       copy: content="{{ middleware_ssl_certificate }}" dest=/etc/nginx/middleware.crt
       notify:
           - restart nginx
 
-    - name: Put proxy key for {{ component_name }}
+    - name: Put SSL private key for middleware
       copy: content="{{ middleware_ssl_key }}" dest=/etc/nginx/middleware.key owner=root mode=400
       notify:
           - restart nginx
 
 # Encrypting secrets
-An [environment](#environment) will typicaly contain secrets like passwords, private keys. Ansible-tools can use a vault 
-to store these secrets in encrypted form in the environment. A vault uses a symetric key to encrypt en decrypt secrets 
-so only this key has to be protected. This allows the encrypted values to be put inder version control like the rest 
+An [environment](#environment) will typically contain secrets like passwords, private keys. Ansible-tools can use a vault 
+to store these secrets in encrypted form in the environment. A vault uses a symmetric key to encrypt and decrypt secrets 
+so only this key has to be protected. This allows the encrypted values to be put under version control like the rest 
 of the environment.
 
 The included "create_new_environment.sh" script can be used to create the encryption key for an environment and to
-generate the secrets required by the environment in one go. The specification for the secrets to create and wether 
+generate the secrets required by the environment in one go. The specification for the secrets to create and whether 
 to use encryption in configured in the "environment.conf" in the template.
 
 Ansible-tools promotes a setup for encrypting secrets that is different from the 
-[Ansible Vault](http://docs.ansible.com/ansible/playbooks_vault.html). Where the Ansible vault feature encrypts an entire 
-.yml file with varibale names and values, whereas the Asnible-tools approach encrypts just the values en decryptes them 
+[Ansible Vault](http://docs.ansible.com/ansible/playbooks_vault.html). The Ansible vault feature encrypts an entire 
+.yml file with variable names and values, whereas the ansible-tools approach encrypts just the values en decrypts them 
 just before they are needed. Both use the [python-keyczar](https://pypi.python.org/pypi/python-keyczar) for encryption.
 
-When talking about a **vault** in the rest of this document this refers to the way Ansible-tools uses keyczar to work 
+When talking about a **vault** in the rest of this document this refers to the way ansible-tools uses keyczar to work 
 with encrypted values, not the Ansible playbook vault.
 
 ## Required tools
@@ -301,7 +306,7 @@ secrets or private keys generated by the "create_new_environment.sh" will be enc
 changed. To create encrypted secrets you can delete the exiting ons and rerun the script, or you can encrypt them
 manually using the _encrypt-file.sh_ script. 
 
-E.g to output the encypted contents of "environments/password/some_password":
+E.g to output the encrypted contents of "environments/password/some_password":
 
 `$ ./scripts/encrypt-file.sh environment/vm/ansible-keystore -f environments/password/some_password`
 
@@ -309,8 +314,8 @@ The encrypted secrets, password and certificates to be created by the _create_ne
 in the _environments/template/environment.conf_ file. Generated secrets will be stored in the environment in the 
 "password", "secret", "ssl_cert" or "saml_cert" directory, depending on type.
 
-You must update your playbooks to decrypt the secrets. Ansible-tools already set a variable "vault_keydir" in 
-_group_vars/all.yml_ that points to the keyset: `vault_keydir: "{{ inventory_dir }}/ansible-keystore"`.
+You must update your playbooks to decrypt the secrets. The ansible-tools example playbook already set a variable "vault_keydir" in 
+_group_vars/all.yml_ that points to the keyczar keyset for decrypting secrets: `vault_keydir: "{{ inventory_dir }}/ansible-keystore"`.
 
 We assume that you are loading your secrets in (group) variables as described [above](#using_secrets).
 
@@ -344,19 +349,27 @@ Example of the same task that is using encrypted passwords:
  
 ## Keyset
 
-When "USE_KEYSZAR=1" in _environments/template/environment.conf_ the "create_new_environment.sh" script will create a 
-keyset for the enviroment. This keyset contains the secret key that is used to encrypt and decrypt secrets. An existing 
+When "USE_KEYCZAR=1" in _environments/template/environment.conf_ the "create_new_environment.sh" script will create a 
+keyset for the environment. This keyset contains the secret key that is used to encrypt and decrypt secrets. An existing 
 keyset will not be overwritten.
 
-## Using enrypted secrets in your playbooks
+## Creating an encrypted secret
 
-Decryption of secrets is
+Several utility scripts are provided to create encrypted secrets:
+
+* An existing secret in a file can be encrypted using _encrypt-file.sh_ script.
+  E.g. to encrypt the contents of "/file/with/plaintext/secret" and store it in "environment/secrets/encrypted_secret":
+
+    `$ ./scripts/encrypt-file.sh environment/vm/ansible-keystore -f /file/with/plaintext/secret > environment/secrets/encrypted_secret`
+
+* A new random password can be generated using the _gen_password.sh_ script.
+  E.g. to generate a new 15 character long encrypted password in "environment/passwords/encrypted_password":
+  
+    `$ ./scripts/gen_password.sh 15 environment/vm/ansible-keystore > environment/secrets/encrypted_secret`
 
 ## Decrypting an encrypted file
 
 An encrypted file can be decrypted using the "-d" option to the _encrypt-file.sh_ script.
+E.g. to output the decrypted contents of "environment/password/some_password":
 
-E.g. to output the decrypted contents of "environments/password/some_password":
-
-`$ ./scripts/encrypt-file.sh -d environment/vm/ansible-keystore -f environments/password/some_password`
-
+`$ ./scripts/encrypt-file.sh -d environment/vm/ansible-keystore -f environment/password/some_password`
