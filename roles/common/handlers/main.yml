@@ -6,5 +6,5 @@
 - name: restart ntpd
   service: name=ntpd state=restarted
 
-# Include handlers for environment specific tasks
-- include: "{{ inventory_dir }}/handlers/common.yml"
+- name: restart sshd
+  service: name=ssh state=restarted
