@@ -18,7 +18,7 @@
   with_items: example_list1
 
 - name: Print each item in example_list_of_dict1
-  debug: msg="{{ item.item1 }}; {{ item['item2'] }}"
+  debug: msg="{{ item.1 }}; {{ item[2] }}"
   with_items: example_list_of_dict1
 
 - name: with_items with an in place list of dict
