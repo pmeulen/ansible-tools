@@ -1,9 +1,17 @@
 ---
 
-- name: Print value of variable string1
+# This file is included from "include_syntax.yml"
+
+-  name: Increase "include_count" by one each time this file is included
+   set_fact: include_count={{ (include_count | default(0) | int) + 1  }}
+
+- name: Print include_count
+  debug: var=include_count
+
+- name: Print variable variable1, if defined, "not defined" otherwise
   debug:
     msg: "variable1: {{ variable1 | default('not defined') }}"
 
-- name: Print variable variable1, if defined
+- name: Print variable variable2, if defined
   debug: var=variable2
   when: variable2 is defined

@@ -5,7 +5,7 @@
 
 - name: Configuration for all nodes
   hosts: all
-  sudo: True
+  become: True
   tags: common
   gather_facts: no
   remote_user: "{{ ansible_remote_user }}"

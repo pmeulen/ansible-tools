@@ -1,13 +1,13 @@
 ---
 
 - name: Examples -- task syntax
-  include: task_syntax.yml
+  import_tasks: task_syntax.yml
 
 - name: Example -- with_items
-  include: with_items_syntax.yml
+  import_tasks: with_items_syntax.yml
 
 - name: Example -- include syntax
-  include: include_syntax.yml
+  import_tasks: include_syntax.yml
 
 - name: Example -- task options
-  include: task_options.yml
+  import_tasks: task_options.yml

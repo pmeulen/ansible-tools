@@ -38,4 +38,4 @@
   - iptables-persistent
 
 # Include environment specific tasks
-- include: "{{ inventory_dir }}/tasks/common.yml"
+- include_tasks: "{{ inventory_dir }}/tasks/common.yml"

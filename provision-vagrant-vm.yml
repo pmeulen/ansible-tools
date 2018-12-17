@@ -18,7 +18,8 @@
       - name: Apt dist-upgrade
         apt: update_cache=yes upgrade=dist cache_valid_time=3600
 
-      - name: Install optional packages
-        apt: name={{ item }}
-        with_items:
-        - vim
+
+      - name: Install vim, git, ansible, python-keyczar, expect
+        apt:
+          name:
+          - vim
