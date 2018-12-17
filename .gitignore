@@ -3,5 +3,6 @@
 /.vagrant
 /apt
 /environments/vm/*
+/tests/bats/
 !/environments/vm/inventory
 !/environments/vm/host_vars
