@@ -16,11 +16,11 @@
 - name: Set /etc/timezone
   copy: content="{{ timezone }}" dest=/etc/timezone
 
-- name: Install ntp, iptables-persistent, rsyslog
+- name: Install ntp, netfilter-persistent, rsyslog
   apt: name={{item}} state=present
   with_items:
   - ntp
-  - iptables-persistent
+  - netfilter-persistent
   - rsyslog
 
 - name: Put iptables configuration
@@ -29,13 +29,13 @@
     - rules.v4
     - rules.v6
   notify:
-  - restart iptables-persistent
+  - restart netfilter-persistent
 
-- name: Enable services ntpd, iptables-persistent on boot
+- name: Enable services ntpd, netfilter-persistent on boot
   service: name={{item}} enabled=true
   with_items:
   - ntp
-  - iptables-persistent
+  - netfilter-persistent
 
 # Include environment specific tasks
 - include_tasks: "{{ inventory_dir }}/tasks/common.yml"

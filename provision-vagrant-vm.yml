@@ -1,11 +1,9 @@
 ---
 
-- name: Provision Vagrant VM (Ubuntu 14.04 LTS)
+- name: Provision Vagrant VM
   hosts: all
-  sudo: True
+  become: True
   gather_facts: False
-  vars:
-      - ansible_ssh_user: vagrant
 
   tasks:
       - name: Create dir for storing apt cache in /vagrant
@@ -13,6 +11,8 @@
 
       - name: Set apt cache location
         copy: content='dir::cache::archives "/vagrant/apt/cache";' dest=/etc/apt/apt.conf.d/cache
+
+      - debug: msg="Running 'apt dist-upgrade', this may take a while..."
 
       # May take a while...
       - name: Apt dist-upgrade
@@ -23,3 +23,7 @@
         apt:
           name:
           - vim
+          - git
+          - ansible
+          - python-keyczar
+          - expect

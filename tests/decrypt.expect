@@ -1,0 +1,12 @@
+#!/usr/bin/expect -f
+
+log_user 0
+set encrypted [lindex $argv 0];
+spawn ../scripts/encrypt.sh -d /tmp/key_dir
+expect "Type the encrypted string: "
+send $encrypted
+send "\n"
+expect -r "The decrypted secret: (.*)$"
+puts $expect_out(1,string);
+set chan [open /tmp/enc_dir/dec w]
+puts $chan $expect_out(1,string);

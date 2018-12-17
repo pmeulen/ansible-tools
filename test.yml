@@ -1,0 +1,8 @@
+---
+
+- hosts: localhost
+  pre_tasks:
+  - name: Test vault decrypt
+    copy:
+      content: "{{ lookup('file', '/tmp/enc_dir/encrypted') | vault('/tmp/key_dir') }}"
+      dest: "/tmp/enc_dir/decrypted"

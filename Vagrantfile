@@ -4,13 +4,20 @@
 Vagrant.configure("2") do |config|
 
     # The VM Image to use. Find others at: http://vagrantcloud.com
+    # The puppetlabs/ubuntu-16.04-64-nocm box supports both a VMware and a virtual box
     # Note: The "nocm" version of this box does not have any puppet software installed
-    config.vm.box = "puppetlabs/ubuntu-14.04-64-nocm"
+    config.vm.box = "puppetlabs/ubuntu-16.04-64-nocm"
 
     # VM: "dev-vm"
     config.vm.define "dev-vm" do |conf|
+        # Workaround for "port 2222 in use error" with "vagrant up". Vagrant cannot fix this automatically
+        # Instead of the default 2222, use a randomly selected port from the range 1000-5000.
+        r = Random.new
+        ssh_port = r.rand(1000...5000)
+        config.vm.network "forwarded_port", guest: 22, host: "#{ssh_port}", id: 'ssh', auto_correct: true
         conf.vm.hostname = "dev-vm"
-        # Give it a fixed IP
+        # Give the VM a fixed IP. This allows using /etc/hosts and makes setting up host base network with
+        # multiple VMs that can reach each other much simpler
         conf.vm.network "private_network", ip: "192.168.66.66", :netmask => "255.255.255.0"
         conf.vm.provider "vmware_fusion" do |v|
             v.vmx["memsize"] = "1024"
@@ -22,6 +29,9 @@ Vagrant.configure("2") do |config|
 
 #    # VM: "dev-vm2"
 #    config.vm.define "dev-vm2" do |conf|
+#        r = Random.new
+#        ssh_port = r.rand(1000...5000)
+#        config.vm.network "forwarded_port", guest: 22, host: "#{ssh_port}", id: 'ssh', auto_correct: true
 #        conf.vm.hostname = "dev-vm2"
 #        # Give it a fixed IP
 #        conf.vm.network "private_network", ip: "192.168.66.67", :netmask => "255.255.255.0"
@@ -38,8 +48,9 @@ Vagrant.configure("2") do |config|
         # For use by ansible-playbook later.
         # These are not used by provision.yml
 
+        ansible.compatibility_mode = "2.0"
         ansible.groups = {
-          "somegroup" => ["dev-vm"],
+          "example" => ["dev-vm"],
         }
         ansible.playbook = "provision-vagrant-vm.yml"
         #ansible.verbose = "vvvv" # For troubleshooting ansible connection problems

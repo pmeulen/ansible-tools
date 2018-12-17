@@ -3,6 +3,18 @@
 # Run using:
 # ansible-playbook site.yml -i environments/vm/inventory
 
+
+- hosts: all
+  pre_tasks:
+    - name: Ansible version
+      debug: msg="Ansible version {{ ansible_version.full }}"
+    - name: Verify Ansible meets Drupal VM's version requirements.
+      assert:
+        that: "ansible_version.full | version_compare('2.4', '>=')"
+        msg: >
+          "Running this playbook requires at least Ansible 2.4"
+
+
 - name: Configuration for all nodes
   hosts: all
   become: True
@@ -15,11 +27,9 @@
 
 
 # Applies the "example" role to the hosts in the "example" group
-# In the default inventory the "example" group does not exists, nor are there hosts named "example". Therefore the
-# example role is not applied to any hosts
 - name: Apply role "example" to hosts in group "example"
   hosts: example
-  sudo: True
+  become: False
   tags: example
   gather_facts: no
   remote_user: "{{ ansible_remote_user }}"
