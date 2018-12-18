@@ -28,8 +28,10 @@
 
 
 # decrypt string "encrypted: using key stored in "keydir".
+# Compatible with python2 and python3, but for python2 use python-keyczar and for python3 use python3-keyczar
 def vault(encrypted, keydir):
-    method = """
+  #keydir = "~/.stepup-ansible-keystore"
+  method = """
 from keyczar import keyczar
 import os.path
 import sys
@@ -37,21 +39,21 @@ import sys
 expanded_keydir = os.path.expanduser("%s")
 crypter = keyczar.Crypter.Read(expanded_keydir)
 sys.stdout.write(crypter.Decrypt("%s"))
-    """ % (keydir, encrypted)
-    from subprocess import check_output
-    return check_output(["python", "-c", method])
+  """ % (keydir, encrypted)
+  from subprocess import check_output
+  return check_output(["python", "-c", method], universal_newlines=True)
 
 
-# Strip PEM headers and remove all whitespace from "string"
+# Compatible with python2 and python3
 def depem(string):
-    import re
-    return re.sub(r'\s+|(-----(BEGIN|END).*-----)', '', string)
+  import re
+  return re.sub(r'\s+|(-----(BEGIN|END).*-----)', '', string)
 
 
 class FilterModule(object):
 
-    def filters(self):
-        return {
-            'vault': vault,
-            'depem': depem,
-        }
+  def filters(self):
+    return {
+      'vault': vault,
+      'depem': depem,
+    }
