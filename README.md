@@ -373,3 +373,9 @@ An encrypted file can be decrypted using the "-d" option to the _encrypt-file.sh
 E.g. to output the decrypted contents of "environment/password/some_password":
 
 `$ ./scripts/encrypt-file.sh -d environment/vm/ansible-keystore -f environment/password/some_password`
+
+# Tests
+
+The tests in the `/tests` directory can be run in on the developemnt VM. This tests the scripts with both python2 and python3. To run the tests run the following to commands from the host:
+1. Create the VM: `$ vagrant up`
+2. Run the tests: `$ ./run-tests.sh`
