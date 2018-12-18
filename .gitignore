@@ -4,5 +4,6 @@
 /apt
 /environments/vm/*
 /tests/bats/
+/tests/py3/
 !/environments/vm/inventory
 !/environments/vm/host_vars

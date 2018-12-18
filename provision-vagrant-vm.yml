@@ -19,11 +19,23 @@
         apt: update_cache=yes upgrade=dist cache_valid_time=3600
 
 
-      - name: Install vim, git, ansible, python-keyczar, expect
+      - name: Install vim, git, ansible, python-keyczar, expect, python3-virtualenv
         apt:
           name:
           - vim
+
+          # for running tests
           - git
+          - expect
+
+          # Old Ansible (2.0.0.2) on system python (2.7.12)
           - ansible
           - python-keyczar
-          - expect
+
+          # Python3 environment
+          - python3-venv # to create venv
+          - python3-pip # pip for python3
+
+      - name: Create directory for python3 venv
+        file: state=directory path=/opt/py3
+
